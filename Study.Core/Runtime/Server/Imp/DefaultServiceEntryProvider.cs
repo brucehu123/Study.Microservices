@@ -12,9 +12,9 @@ namespace Study.Core.Runtime.Server.Imp
     {
         private readonly IEnumerable<Type> _types;
         private readonly IServerEntryCreator _entryCreator;
-        private readonly ILogger _logger;
+        private readonly ILogger<DefaultServiceEntryProvider> _logger;
 
-        public DefaultServiceEntryProvider(IEnumerable<Type> types, IServerEntryCreator entryCreator, ILogger logger)
+        public DefaultServiceEntryProvider(IEnumerable<Type> types, IServerEntryCreator entryCreator, ILogger<DefaultServiceEntryProvider> logger)
         {
             _types = types;
             _entryCreator = entryCreator;

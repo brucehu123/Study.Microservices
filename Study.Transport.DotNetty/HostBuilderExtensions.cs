@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Study.Core.Runtime.Server;
@@ -14,6 +12,7 @@ namespace Study.Transport.DotNetty
             builder.ConfigureServices((context, services) =>
             {
                 services.AddSingleton<IServerBootstrap, DotNettyServerBootstrap>();
+                services.AddSingleton<ISocketService, DotNettySocketService>();
             });
             return builder;
         }

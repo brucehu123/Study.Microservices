@@ -25,11 +25,11 @@ namespace Study.Transport.DotNetty
         private readonly ISocketService _service;
         private IChannel _channel;
 
-        public DotNettyServerBootstrap(IOptions<ServerAddress> address, ISocketService service, ITransportMessageDecoder decoder, ILogger<DotNettyServerBootstrap> logger)
+        public DotNettyServerBootstrap(IOptions<ServerAddress> address, ISocketService service, ITransportMessageCodecFactory codecFactory, ILogger<DotNettyServerBootstrap> logger)
         {
             _logger = logger;
             _address = address;
-            _decoder = decoder;
+            _decoder = codecFactory.CreateDecoder();
             _service = service;
         }
 
@@ -53,10 +53,10 @@ namespace Study.Transport.DotNetty
                     var pipeline = channel.Pipeline;
                     pipeline.AddLast(new LengthFieldPrepender(4));
                     pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
-                    pipeline.AddLast(new ChannelDecoderHandlerAdpter(_decoder));
+                    pipeline.AddLast(new ChannelDecoderHandlerAdpter(_decoder,_logger));
                     pipeline.AddLast(new ChannelServerHandlerAdpter(_service, _logger));
                 }));
-            _channel = await bootstrap.BindAsync(new IPEndPoint(IPAddress.Parse(host),port));
+            _channel = await bootstrap.BindAsync(new IPEndPoint(IPAddress.Parse(host), port));
 
             if (_logger.IsEnabled(LogLevel.Debug))
                 _logger.LogDebug($"准备启动服务主机，监听地址：{host}:{port}。");
@@ -64,7 +64,9 @@ namespace Study.Transport.DotNetty
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("消息传送断开");
+            return _channel.DisconnectAsync();
         }
     }
 }

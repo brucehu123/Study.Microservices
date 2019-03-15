@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Study.Core.Message;
+using Study.Core.Transport;
 
 namespace Study.Core.Runtime.Client.Imp
 {
@@ -61,7 +63,14 @@ namespace Study.Core.Runtime.Client.Imp
             if (_remoteContext == null)
                 throw new Exception("RemoteContext为空");
 
-            var senderString = JsonConvert.SerializeObject(_remoteContext);
+            RemoteInvokeMessage message=new RemoteInvokeMessage()
+            {
+                ServiceId = _remoteContext.ServiceId,
+                Parameters = _remoteContext.Parameters
+            };
+            var transportMessage = TransportMessage.CreateInvokeMessage(message);
+
+             var senderString = JsonConvert.SerializeObject(transportMessage);
             byte[] messageBytes = Encoding.UTF8.GetBytes(senderString);
             var initMessage = Unpooled.Buffer(messageBytes.Length);
             initMessage.WriteBytes(messageBytes);

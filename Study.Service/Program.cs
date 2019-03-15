@@ -19,7 +19,6 @@ namespace Study.Service
                 .UseDotNettyServer()
                 .ConfigureAppConfiguration((context, config) =>
                 {
-
                     config.SetBasePath(Directory.GetCurrentDirectory());
                     config.AddJsonFile("appsettings.json", optional: true);
                     config.AddEnvironmentVariables();
@@ -27,7 +26,6 @@ namespace Study.Service
                  .ConfigureServices((context, services) =>
                  {
                      services.AddTransient<IUserService, UserService>();
-                     //services.Configure<ServerAddress>(context.Configuration.GetSection("ServerHost"));
                  })
                  .ConfigureLogging((context, logger) =>
                  {

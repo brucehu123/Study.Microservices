@@ -4,6 +4,7 @@ using System.Text;
 using DotNetty.Transport.Channels;
 using Microsoft.Extensions.Logging;
 using Study.Core.Runtime;
+using Study.Core.Transport;
 
 namespace Study.Transport.DotNetty
 {
@@ -20,17 +21,21 @@ namespace Study.Transport.DotNetty
 
         public override void ChannelActive(IChannelHandlerContext context)
         {
-            _service.OnConnected();
+            if(_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("通信接通");
+            _service.OnConnected(context);
         }
 
         public override void ChannelInactive(IChannelHandlerContext context)
         {
-            _service.OnDisconnected();
+            if (_logger.IsEnabled(LogLevel.Debug))
+                _logger.LogDebug("通信断开");
+            _service.OnDisconnected(context);
         }
 
         public override void ChannelRead(IChannelHandlerContext context, object message)
         {
-            _service.OnReceive();
+            _service.OnReceive(context,message);
         }
 
         public override void ChannelReadComplete(IChannelHandlerContext context)
@@ -40,7 +45,7 @@ namespace Study.Transport.DotNetty
 
         public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
         {
-            _service.OnException();
+            _service.OnException(context,exception);
         }
     }
 }
