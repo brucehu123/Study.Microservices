@@ -15,7 +15,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sample", "sample", "{C7F759
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Study.ProxyGenerator", "Study.ProxyGenerator\Study.ProxyGenerator.csproj", "{C2A8256A-ABC8-4BED-8961-B64D08EC71B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Study.Transport.DotNetty", "Study.Transport.DotNetty\Study.Transport.DotNetty.csproj", "{737CFC61-6515-42D1-BD9E-201268E5E49D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Study.Transport.DotNetty", "Study.Transport.DotNetty\Study.Transport.DotNetty.csproj", "{737CFC61-6515-42D1-BD9E-201268E5E49D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Doc", "Doc", "{D66A4A7C-8488-4316-B0A9-0C5046216B38}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
