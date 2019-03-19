@@ -19,7 +19,7 @@ namespace Study.Core.Runtime.Client.Imp
         public Task<string> InvokeAsync(RemoteInvokeContext context)
         {
             if (context == null)
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
             if (context.ServiceId == null)
                 throw new ArgumentNullException("serviceId");
             TaskCompletionSource<string> tcs = new TaskCompletionSource<string>();

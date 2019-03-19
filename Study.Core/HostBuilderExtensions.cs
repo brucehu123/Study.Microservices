@@ -14,6 +14,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Study.Core.Runtime.Client;
+using Study.Core.Runtime.Client.Imp;
 using Study.Core.Runtime.Server.Imp;
 
 
@@ -43,6 +45,20 @@ namespace Study.Core
                 services.AddSerialization();
                 services.AddCodec();
                 services.AddServerEntry();
+            });
+            return builder;
+        }
+
+        public static IHostBuilder AddRpcClient(this IHostBuilder builder)
+        {
+            builder.ConfigureServices((context, services) =>
+            {
+                services.AddOptions();
+                services.AddLogging();
+
+                services.AddHostedService<RpcClientHost>();
+                services.AddSingleton<IRemoteServiceInvoker, RemoteServiceInvoker>();
+                services.AddSingleton<IServiceIdGenerator, ServiceIdGenerator>();
             });
             return builder;
         }

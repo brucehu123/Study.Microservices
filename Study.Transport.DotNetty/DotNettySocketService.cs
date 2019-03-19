@@ -64,9 +64,6 @@ namespace Study.Transport.DotNetty
                 await context.WriteAndFlushAsync(buffer);
 
             }).ConfigureAwait(false);
-
-
-            //todo: send result to remote client
         }
     }
 }
