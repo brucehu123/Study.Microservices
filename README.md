@@ -28,3 +28,44 @@
 
             host.RunConsoleAsync().Wait();
 ```
+
+**启动客户端**
+
+```
+ var builder = new HostBuilder()
+                .AddClientProxy()
+                .AddRpcClient()
+                .ConfigureLogging((context, logger) =>
+                {
+                    logger.AddConfiguration(context.Configuration.GetSection("Logging"));
+                    logger.AddConsole();
+                });
+                
+            using (var host=builder.UseConsoleLifetime().Build())
+            {
+                host.Start();
+
+                var provider = host.Services;
+                var proxyGenerater = provider.GetService<IServiceProxyGenerater>();
+                var remoteServices = proxyGenerater.GenerateProxys(new[] { typeof(IUserService) }).ToArray();
+                var proxyFactory = provider.GetService<IServiceProxyFactory>();
+                var userService = proxyFactory.CreateProxy<IUserService>(remoteServices.Single(typeof(IUserService).GetTypeInfo().IsAssignableFrom));
+
+                Stopwatch sw = Stopwatch.StartNew();
+
+                for (var i = 0; i < 100; i++)
+                {
+                    Stopwatch watch = Stopwatch.StartNew();
+                    var result = userService.GetUserNameAsync(i).Result;
+                    Console.WriteLine(result);
+                    watch.Stop();
+
+                    Console.WriteLine($"{watch.ElapsedMilliseconds}");
+                }
+                sw.Stop();
+                Console.WriteLine($"调用结束,耗时：{sw.ElapsedMilliseconds} 毫秒");
+
+                host.WaitForShutdown();
+            }
+
+```
