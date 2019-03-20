@@ -112,65 +112,41 @@ namespace Study.Client
 
         static void Main(string[] args)
         {
-            ServiceProvider provider = null;
-
             var builder = new HostBuilder()
-                    .ConfigureServices((context, services) =>
-                    {
-                        provider = services.BuildServiceProvider();
-                    })
-                    .ConfigureLogging((context, logger) =>
-                    {
-                        logger.AddConfiguration(context.Configuration.GetSection("Logging"));
-                        logger.AddConsole();
-                    })
                 .AddClientProxy()
-                .AddRpcClient();
+                .AddRpcClient()
+                .ConfigureLogging((context, logger) =>
+                {
+                    logger.AddConfiguration(context.Configuration.GetSection("Logging"));
+                    logger.AddConsole();
+                });
+                
             using (var host=builder.UseConsoleLifetime().Build())
             {
                 host.Start();
 
+                var provider = host.Services;
                 var proxyGenerater = provider.GetService<IServiceProxyGenerater>();
                 var remoteServices = proxyGenerater.GenerateProxys(new[] { typeof(IUserService) }).ToArray();
                 var proxyFactory = provider.GetService<IServiceProxyFactory>();
                 var userService = proxyFactory.CreateProxy<IUserService>(remoteServices.Single(typeof(IUserService).GetTypeInfo().IsAssignableFrom));
 
-                var result = userService.GetUserNameAsync(10).Result;
-                Console.WriteLine(result);
+                Stopwatch sw = Stopwatch.StartNew();
+
+                for (var i = 0; i < 100; i++)
+                {
+                    Stopwatch watch = Stopwatch.StartNew();
+                    var result = userService.GetUserNameAsync(i).Result;
+                    Console.WriteLine(result);
+                    watch.Stop();
+
+                    Console.WriteLine($"{watch.ElapsedMilliseconds}");
+                }
+                sw.Stop();
+                Console.WriteLine($"调用结束,耗时：{sw.ElapsedMilliseconds} 毫秒");
 
                 host.WaitForShutdown();
             }
-
-
-
-
-         
-
-            //Console.WriteLine("开始客户端!");
-
-            //var proxyGenerater = new ServiceProxyGenerater(new ServiceIdGenerator(), new LoggerFactory().CreateLogger<ServiceProxyGenerater>());
-            //var services = proxyGenerater.GenerateProxys(new[] { typeof(IUserService) }).ToArray();
-            //var proxyFactory = new ServiceProxyFactory(new RemoteServiceInvoker());
-            //var userService = proxyFactory.CreateProxy<IUserService>(services.Single(typeof(IUserService).GetTypeInfo().IsAssignableFrom));
-
-            //Console.WriteLine("开始一百次调用");
-
-            //Stopwatch sw = Stopwatch.StartNew();
-
-            //for (var i = 0; i < 100; i++)
-            //{
-            //    Stopwatch watch = Stopwatch.StartNew();
-            //    var result = userService.GetUserNameAsync(i).Result;
-            //    Console.WriteLine(result);
-            //    watch.Stop();
-
-            //    Console.WriteLine($"{watch.ElapsedMilliseconds}");
-            //}
-
-            //sw.Stop();
-
-            //Console.WriteLine($"调用结束,耗时：{sw.ElapsedMilliseconds} 毫秒");
-
 
         }
 
