@@ -1,30 +1,14 @@
-﻿using DotNetty.Codecs;
-using DotNetty.Transport.Bootstrapping;
-using DotNetty.Transport.Channels;
-using DotNetty.Transport.Channels.Sockets;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Study.Common;
-using Study.Core.Attributes;
-using Study.Core.Runtime.Client.Imp;
-using Study.Core.ServiceId.Imp;
 using Study.ProxyGenerator;
-using Study.ProxyGenerator.Implementation;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Reflection;
-using System.Runtime.Loader;
-using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Study.Core;
-using IServiceProxyFactory = Study.ProxyGenerator.IServiceProxyFactory;
-using IServiceProxyGenerater = Study.ProxyGenerator.IServiceProxyGenerater;
+using Study.Transport.DotNetty;
 
 namespace Study.Client
 {
@@ -113,8 +97,10 @@ namespace Study.Client
         static void Main(string[] args)
         {
             var builder = new HostBuilder()
-                .AddClientProxy()
+                .AddRpcRuntime()
                 .AddRpcClient()
+                .AddClientProxy()
+                .UseDotNettyClient()
                 .ConfigureLogging((context, logger) =>
                 {
                     logger.AddConfiguration(context.Configuration.GetSection("Logging"));
@@ -133,14 +119,9 @@ namespace Study.Client
 
                 Stopwatch sw = Stopwatch.StartNew();
 
-                for (var i = 0; i < 100; i++)
+                for (var i = 0; i < 1000; i++)
                 {
-                    Stopwatch watch = Stopwatch.StartNew();
                     var result = userService.GetUserNameAsync(i).Result;
-                    Console.WriteLine(result);
-                    watch.Stop();
-
-                    Console.WriteLine($"{watch.ElapsedMilliseconds}");
                 }
                 sw.Stop();
                 Console.WriteLine($"调用结束,耗时：{sw.ElapsedMilliseconds} 毫秒");

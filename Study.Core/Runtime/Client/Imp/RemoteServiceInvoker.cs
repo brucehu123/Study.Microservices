@@ -7,8 +7,10 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Study.Core.Message;
 using Study.Core.Transport;
 
@@ -16,103 +18,109 @@ namespace Study.Core.Runtime.Client.Imp
 {
     public class RemoteServiceInvoker : IRemoteServiceInvoker
     {
-        public Task<string> InvokeAsync(RemoteInvokeContext context)
+        private readonly IRpcClientFactory _clientFactory;
+        private readonly ILogger<RemoteServiceInvoker> _logger;
+
+        public RemoteServiceInvoker(IRpcClientFactory factory, ILogger<RemoteServiceInvoker> logger)
+        {
+            this._logger = logger;
+            this._clientFactory = factory;
+        }
+
+        public async Task<RemoteInvokeResultMessage> InvokeAsync(RemoteInvokeContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
             if (context.ServiceId == null)
                 throw new ArgumentNullException("serviceId");
-            TaskCompletionSource<string> tcs = new TaskCompletionSource<string>();
-            var bootstrap = new Bootstrap();
-            bootstrap
-                .Channel<TcpSocketChannel>()
-                .Option(ChannelOption.TcpNodelay, true)
-                .Group(new MultithreadEventLoopGroup())
-                .Handler(new ActionChannelInitializer<ISocketChannel>(c =>
-                {
-                    var pipeline = c.Pipeline;
-                    pipeline.AddLast(new LengthFieldPrepender(4));
-                    pipeline.AddLast(new LengthFieldBasedFrameDecoder(int.MaxValue, 0, 4, 0, 4));
-                    pipeline.AddLast(new StudyClientHandler(10, tcs, context));
-                }));
 
-            var channel = bootstrap.ConnectAsync(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7788)).Result;
-
-            return tcs.Task;
-        }
-    }
-
-    public class StudyClientHandler : ChannelHandlerAdapter
-    {
-        private readonly int _id;
-        private readonly TaskCompletionSource<string> _tsc;
-        private readonly RemoteInvokeContext _remoteContext;
-
-        public StudyClientHandler(int id, TaskCompletionSource<string> tsc, RemoteInvokeContext context)
-        {
-            _id = id;
-            _tsc = tsc;
-            _remoteContext = context;
-        }
-
-        public override void ChannelActive(IChannelHandlerContext context)
-        {
-            Console.WriteLine("客户端通信通道激活");
-            Console.WriteLine("客户端发发送消息");
-
-            if (_remoteContext == null)
-                throw new Exception("RemoteContext为空");
-
-            RemoteInvokeMessage message=new RemoteInvokeMessage()
+            RemoteInvokeMessage message = new RemoteInvokeMessage()
             {
-                ServiceId = _remoteContext.ServiceId,
-                Parameters = _remoteContext.Parameters
+                ServiceId = context.ServiceId,
+                Parameters = context.Parameters
             };
             var transportMessage = TransportMessage.CreateInvokeMessage(message);
+            var client = await _clientFactory.CreateClientAsync(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7788));
 
-             var senderString = JsonConvert.SerializeObject(transportMessage);
-            byte[] messageBytes = Encoding.UTF8.GetBytes(senderString);
-            var initMessage = Unpooled.Buffer(messageBytes.Length);
-            initMessage.WriteBytes(messageBytes);
-            context.WriteAndFlushAsync(initMessage);
-
-            Console.WriteLine($"发送消息：{senderString}");
-
-            Console.WriteLine("客户端消息发送完成");
-        }
-
-        public override void ChannelInactive(IChannelHandlerContext context)
-        {
-            Console.WriteLine("客户端通信通道断开");
-        }
-
-        public override void ChannelRead(IChannelHandlerContext context, object message)
-        {
-            var byteBuffer = message as IByteBuffer;
-            if (byteBuffer != null)
+            try
             {
-                // Console.WriteLine("客户端接收到结果: " + byteBuffer.ToString(Encoding.UTF8));
-                var result = byteBuffer.ToString(Encoding.UTF8);
-                _tsc.SetResult(result);
+                await client.SendAsync(transportMessage);
             }
-            //todo:实现调用
-        }
+            catch (Exception e)
+            {
+                _logger.LogError("远程调用发生错误", e);
+                throw e;
+            }
 
-        public override void ChannelReadComplete(IChannelHandlerContext context) => context.Flush();
+            var result = await client.CallBack.Task;
 
-        public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
-        {
-            Console.WriteLine("Exception: " + exception);
-            context.CloseAsync();
+            return result.GetContent<RemoteInvokeResultMessage>();
+
         }
     }
 
-    public class MessageModel
-    {
-        public string Type { get; set; }
+    #region MyRegion
+    //public class StudyClientHandler : ChannelHandlerAdapter
+    //{
+    //    private readonly int _id;
+    //    private readonly TaskCompletionSource<string> _tsc;
+    //    private readonly RemoteInvokeContext _remoteContext;
 
-        public string Method { get; set; }
+    //    public StudyClientHandler(int id, TaskCompletionSource<string> tsc, RemoteInvokeContext context)
+    //    {
+    //        _id = id;
+    //        _tsc = tsc;
+    //        _remoteContext = context;
+    //    }
 
-        public int Id { get; set; }
-    }
+    //    public override void ChannelActive(IChannelHandlerContext context)
+    //    {
+    //        Console.WriteLine("客户端通信通道激活");
+    //        Console.WriteLine("客户端发发送消息");
+
+    //        if (_remoteContext == null)
+    //            throw new Exception("RemoteContext为空");
+
+    //        RemoteInvokeMessage message = new RemoteInvokeMessage()
+    //        {
+    //            ServiceId = _remoteContext.ServiceId,
+    //            Parameters = _remoteContext.Parameters
+    //        };
+    //        var transportMessage = TransportMessage.CreateInvokeMessage(message);
+
+    //        var senderString = JsonConvert.SerializeObject(transportMessage);
+    //        byte[] messageBytes = Encoding.UTF8.GetBytes(senderString);
+    //        var initMessage = Unpooled.Buffer(messageBytes.Length);
+    //        initMessage.WriteBytes(messageBytes);
+    //        context.WriteAndFlushAsync(initMessage);
+
+    //        Console.WriteLine($"发送消息：{senderString}");
+
+    //        Console.WriteLine("客户端消息发送完成");
+    //    }
+
+    //    public override void ChannelInactive(IChannelHandlerContext context)
+    //    {
+    //        Console.WriteLine("客户端通信通道断开");
+    //    }
+
+    //    public override void ChannelRead(IChannelHandlerContext context, object message)
+    //    {
+    //        var byteBuffer = message as IByteBuffer;
+    //        if (byteBuffer != null)
+    //        {
+    //            var result = byteBuffer.ToString(Encoding.UTF8);
+    //            _tsc.SetResult(result);
+    //        }
+    //    }
+
+    //    public override void ChannelReadComplete(IChannelHandlerContext context) => context.Flush();
+
+    //    public override void ExceptionCaught(IChannelHandlerContext context, Exception exception)
+    //    {
+    //        Console.WriteLine("Exception: " + exception);
+    //        context.CloseAsync();
+    //    }
+    //} 
+    #endregion
 }

@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using Study.Core.Convertibles;
 
 namespace Study.ProxyGenerator.Implementation
 {
@@ -13,14 +14,16 @@ namespace Study.ProxyGenerator.Implementation
         #region Field
 
         private readonly IRemoteServiceInvoker _remoteServiceInvoker;
+        private readonly ITypeConvertibleService _typeConvertibleService;
 
         #endregion Field
 
         #region Constructor
 
-        public ServiceProxyFactory(IRemoteServiceInvoker remoteServiceInvoker)
+        public ServiceProxyFactory(IRemoteServiceInvoker remoteServiceInvoker,ITypeConvertibleService typeConvertibleService)
         {
             _remoteServiceInvoker = remoteServiceInvoker;
+            _typeConvertibleService = typeConvertibleService;
         }
 
         #endregion Constructor
@@ -34,7 +37,7 @@ namespace Study.ProxyGenerator.Implementation
         /// <returns>服务代理实例。</returns>
         public object CreateProxy(Type proxyType)
         {
-            var instance = proxyType.GetTypeInfo().GetConstructors().First().Invoke(new object[] { _remoteServiceInvoker });
+            var instance = proxyType.GetTypeInfo().GetConstructors().First().Invoke(new object[] { _remoteServiceInvoker, _typeConvertibleService });
             return instance;
         }
 

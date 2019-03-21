@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Study.Core.Message;
+using Study.Core.Transport;
 
 namespace Study.Core.Runtime.Client
 {
-    public interface IRemoteServiceInvoker
+    public  interface IRpcClient
     {
-        Task<RemoteInvokeResultMessage> InvokeAsync(RemoteInvokeContext context);
+        TaskCompletionSource<TransportMessage> CallBack { get; }
+        Task SendAsync(TransportMessage message);
     }
+  
 }

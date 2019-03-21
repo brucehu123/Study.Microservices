@@ -26,8 +26,6 @@ namespace Study.Core.Runtime.Server.Imp
 
         public async Task<RemoteInvokeResultMessage> InvokerAsync(TransportMessage message)
         {
-            if (_logger.IsEnabled(LogLevel.Information))
-                _logger.LogInformation("接收到消息。");
 
             if (!message.IsInvokeMessage())
                 return null;

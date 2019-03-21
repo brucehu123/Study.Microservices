@@ -7,7 +7,8 @@
 **启动服务端**
 
 ```
- var host = new HostBuilder()
+   var host = new HostBuilder()
+                .AddRpcRuntime()
                 .AddRpcServer()
                 .UseDotNettyServer()
                 .ConfigureAppConfiguration((context, config) =>
@@ -32,9 +33,11 @@
 **启动客户端**
 
 ```
- var builder = new HostBuilder()
-                .AddClientProxy()
+   var builder = new HostBuilder()
+                .AddRpcRuntime()
                 .AddRpcClient()
+                .AddClientProxy()
+                .UseDotNettyClient()
                 .ConfigureLogging((context, logger) =>
                 {
                     logger.AddConfiguration(context.Configuration.GetSection("Logging"));
@@ -53,14 +56,9 @@
 
                 Stopwatch sw = Stopwatch.StartNew();
 
-                for (var i = 0; i < 100; i++)
+                for (var i = 0; i < 1000; i++)
                 {
-                    Stopwatch watch = Stopwatch.StartNew();
                     var result = userService.GetUserNameAsync(i).Result;
-                    Console.WriteLine(result);
-                    watch.Stop();
-
-                    Console.WriteLine($"{watch.ElapsedMilliseconds}");
                 }
                 sw.Stop();
                 Console.WriteLine($"调用结束,耗时：{sw.ElapsedMilliseconds} 毫秒");

@@ -17,23 +17,38 @@ using System.Text;
 using Study.Core.Runtime.Client;
 using Study.Core.Runtime.Client.Imp;
 using Study.Core.Runtime.Server.Imp;
+using Study.Core.Transport.Codec;
+using Study.Core.Transport.Codec.Imp;
 
 
 namespace Study.Core
 {
     public static class HostBuilderExtensions
     {
+        public static IHostBuilder AddRpcRuntime(this IHostBuilder builder)
+        {
+            builder.ConfigureServices((context, services) =>
+            {
+                services.AddOptions();
+                services.AddLogging();
+
+                services.AddSerialization();
+                services.AddCodec();
+
+                services.AddSingleton<IServiceIdGenerator, ServiceIdGenerator>();
+                services.AddSingleton<ITypeConvertibleService, DefaultTypeConvertibleService>();
+                services.AddSingleton<ITypeConvertibleProvider, DefaultTypeConvertibleProvider>();
+            });
+            return builder;
+        }
+
         public static IHostBuilder AddRpcServer(this IHostBuilder builder)
         {
 
             builder.ConfigureServices((context, services) =>
             {
-                services.AddOptions();
-                services.AddLogging();
+               
                 services.Configure<ServerAddress>(context.Configuration.GetSection("ServerHost"));
-                services.AddSingleton<IServiceIdGenerator, ServiceIdGenerator>();
-                services.AddSingleton<ITypeConvertibleService, DefaultTypeConvertibleService>();
-                services.AddSingleton<ITypeConvertibleProvider, DefaultTypeConvertibleProvider>();
                 services.AddSingleton<IServiceInvoker, DefaultServiceInvoker>();
                 services.AddSingleton<IServiceEntryProvider>(p =>
                 {
@@ -42,8 +57,7 @@ namespace Study.Core
                     return new DefaultServiceEntryProvider(types, p.GetRequiredService<IServerEntryCreator>(), p.GetRequiredService<ILogger<DefaultServiceEntryProvider>>());
                 });
                 services.AddHostedService<ServerHost>();
-                services.AddSerialization();
-                services.AddCodec();
+             
                 services.AddServerEntry();
             });
             return builder;
@@ -53,12 +67,8 @@ namespace Study.Core
         {
             builder.ConfigureServices((context, services) =>
             {
-                services.AddOptions();
-                services.AddLogging();
-
                 services.AddHostedService<RpcClientHost>();
                 services.AddSingleton<IRemoteServiceInvoker, RemoteServiceInvoker>();
-                services.AddSingleton<IServiceIdGenerator, ServiceIdGenerator>();
             });
             return builder;
         }

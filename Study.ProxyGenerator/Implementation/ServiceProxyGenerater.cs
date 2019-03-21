@@ -12,7 +12,8 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading.Tasks;
-
+using Study.Core.Convertibles;
+using Study.Core.Serialization;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Study.ProxyGenerator.Implementation
@@ -122,13 +123,12 @@ namespace Study.ProxyGenerator.Implementation
                                 Parameter(
                                     Identifier("remoteServiceInvoker"))
                                     .WithType(
-                                        IdentifierName("IRemoteServiceInvoker"))
-                                //        ,
-                                //Token(SyntaxKind.CommaToken),
-                                //Parameter(
-                                //    Identifier("typeConvertibleService"))
-                                //    .WithType(
-                                //        IdentifierName("ITypeConvertibleService"))
+                                        IdentifierName("IRemoteServiceInvoker")),
+                                Token(SyntaxKind.CommaToken),
+                                Parameter(
+                                    Identifier("typeConvertibleService"))
+                                    .WithType(
+                                        IdentifierName("ITypeConvertibleService"))
                             })))
                 .WithInitializer(
                         ConstructorInitializer(
@@ -137,11 +137,10 @@ namespace Study.ProxyGenerator.Implementation
                                 SeparatedList<ArgumentSyntax>(
                                     new SyntaxNodeOrToken[]{
                                         Argument(
-                                            IdentifierName("remoteServiceInvoker"))
-                                        //    ,
-                                        //Token(SyntaxKind.CommaToken),
-                                        //Argument(
-                                        //    IdentifierName("typeConvertibleService"))
+                                            IdentifierName("remoteServiceInvoker")),
+                                        Token(SyntaxKind.CommaToken),
+                                        Argument(
+                                            IdentifierName("typeConvertibleService"))
                                     }))))
                 .WithBody(Block());
         }
@@ -196,7 +195,7 @@ namespace Study.ProxyGenerator.Implementation
             if (method.ReturnType != typeof(Task))
             {
                 expressionSyntax = GenericName(
-                    Identifier("Invoke"));//.WithTypeArgumentList(((GenericNameSyntax)returnDeclaration).TypeArgumentList);
+                    Identifier("Invoke")).WithTypeArgumentList(((GenericNameSyntax)returnDeclaration).TypeArgumentList);
             }
             else
             {
@@ -311,9 +310,9 @@ namespace Study.ProxyGenerator.Implementation
                     UsingDirective(IdentifierName("System")),
                     UsingDirective(GetQualifiedNameSyntax("System.Threading.Tasks")),
                     UsingDirective(GetQualifiedNameSyntax("System.Collections.Generic")),
-                    //UsingDirective(GetQualifiedNameSyntax(typeof(ITypeConvertibleService).Namespace)),
+                    UsingDirective(GetQualifiedNameSyntax(typeof(ITypeConvertibleService).Namespace)),
                     UsingDirective(GetQualifiedNameSyntax(typeof(IRemoteServiceInvoker).Namespace)),
-                    //UsingDirective(GetQualifiedNameSyntax(typeof(ISerializer<>).Namespace)),
+                    UsingDirective(GetQualifiedNameSyntax(typeof(ISerializer<>).Namespace)),
                     UsingDirective(GetQualifiedNameSyntax(typeof(ServiceProxyBase).Namespace))
 
            

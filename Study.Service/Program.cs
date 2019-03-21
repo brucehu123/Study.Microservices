@@ -15,6 +15,7 @@ namespace Study.Service
         {
 
             var host = new HostBuilder()
+                .AddRpcRuntime()
                 .AddRpcServer()
                 .UseDotNettyServer()
                 .ConfigureAppConfiguration((context, config) =>
