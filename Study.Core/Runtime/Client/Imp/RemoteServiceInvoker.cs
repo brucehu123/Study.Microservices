@@ -40,22 +40,17 @@ namespace Study.Core.Runtime.Client.Imp
                 Parameters = context.Parameters
             };
             var transportMessage = TransportMessage.CreateInvokeMessage(message);
-            var client = await _clientFactory.CreateClientAsync(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7788));
+            var client = _clientFactory.CreateClientAsync(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7788));
 
             try
             {
-                await client.SendAsync(transportMessage);
+              return  await client.SendAsync(transportMessage);
             }
             catch (Exception e)
             {
-                _logger.LogError("远程调用发生错误", e);
+                _logger.LogError("发送远程消息错误", e);
                 throw e;
             }
-
-            var result = await client.CallBack.Task;
-
-            return result.GetContent<RemoteInvokeResultMessage>();
-
         }
     }
 

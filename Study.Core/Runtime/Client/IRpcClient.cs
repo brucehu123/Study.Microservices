@@ -7,10 +7,13 @@ using Study.Core.Transport;
 
 namespace Study.Core.Runtime.Client
 {
-    public  interface IRpcClient
+    public interface IRpcClient : IDisposable
     {
-        TaskCompletionSource<TransportMessage> CallBack { get; }
-        Task SendAsync(TransportMessage message);
+        Task<RemoteInvokeResultMessage> SendAsync(TransportMessage message);
+
+        //TaskCompletionSource<TransportMessage> GetCallBack(string id);
+
+        // Task SetResult(TransportMessage message);
     }
-  
+
 }

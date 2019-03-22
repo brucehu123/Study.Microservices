@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Study.Transport.DotNetty
 {
@@ -9,7 +10,8 @@ namespace Study.Transport.DotNetty
     {
         void OnConnected(IChannelHandlerContext context);
         void OnDisconnected(IChannelHandlerContext context);
-        void OnReceive(IChannelHandlerContext context, object message);
+        Task OnReceive(IChannelHandlerContext context, object message);
+
 
         void OnException(IChannelHandlerContext context, Exception exception);
     }

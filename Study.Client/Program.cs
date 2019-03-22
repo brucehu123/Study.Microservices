@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Study.Core;
@@ -106,8 +107,8 @@ namespace Study.Client
                     logger.AddConfiguration(context.Configuration.GetSection("Logging"));
                     logger.AddConsole();
                 });
-                
-            using (var host=builder.UseConsoleLifetime().Build())
+
+            using (var host = builder.UseConsoleLifetime().Build())
             {
                 host.Start();
 
@@ -117,11 +118,13 @@ namespace Study.Client
                 var proxyFactory = provider.GetService<IServiceProxyFactory>();
                 var userService = proxyFactory.CreateProxy<IUserService>(remoteServices.Single(typeof(IUserService).GetTypeInfo().IsAssignableFrom));
 
+                Console.WriteLine("开始一万次调用");
                 Stopwatch sw = Stopwatch.StartNew();
 
-                for (var i = 0; i < 1000; i++)
+                for (var i = 0; i < 10000; i++)
                 {
                     var result = userService.GetUserNameAsync(i).Result;
+                    //Console.WriteLine(result);
                 }
                 sw.Stop();
                 Console.WriteLine($"调用结束,耗时：{sw.ElapsedMilliseconds} 毫秒");

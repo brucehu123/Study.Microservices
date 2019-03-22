@@ -44,26 +44,23 @@ namespace Study.Transport.DotNetty
             throw new NotImplementedException();
         }
 
-        public void OnReceive(IChannelHandlerContext context, object message)
+        public Task OnReceive(IChannelHandlerContext context, object message)
         {
             var data = (TransportMessage)message;
 
-            Task.Run(async () =>
+            var result = _invoker.InvokerAsync(data).Result;
+            if (result == null)
             {
+                throw new RpcRemoteException("本地服务调用失败", null);
+            }
+            var transportMessage = TransportMessage.CreateInvokeResultMessage(data.Id, result);
+            //var transportMessage = new TransportMessage(result);
+            var byteMessage = _encoder.Encode(transportMessage);
+            var buffer = Unpooled.Buffer(byteMessage.Length, byteMessage.Length);
+            buffer.WriteBytes(byteMessage);
+            return context.WriteAndFlushAsync(buffer);
 
-                var result = await _invoker.InvokerAsync(data);
-                if (result == null)
-                {
-                    throw new RpcRemoteException("本地服务调用失败", null);
-                }
 
-                var transportMessage = new TransportMessage(result);
-                var byteMessage = _encoder.Encode(transportMessage);
-                var buffer = Unpooled.Buffer(byteMessage.Length, byteMessage.Length);
-                buffer.WriteBytes(byteMessage);
-                await context.WriteAndFlushAsync(buffer);
-
-            }).ConfigureAwait(false);
         }
     }
 }

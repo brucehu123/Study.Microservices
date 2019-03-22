@@ -8,6 +8,6 @@ namespace Study.Core.Runtime.Client
 {
     public interface IRpcClientFactory
     {
-        Task<IRpcClient> CreateClientAsync(IPEndPoint endPoint);
+        IRpcClient CreateClientAsync(EndPoint endPoint);
     }
 }
