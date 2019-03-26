@@ -1,5 +1,4 @@
-﻿using Study.Core.Address;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Study.Core.Runtime.Client
 {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Study.Core.Runtime.Server.Configuration
+﻿namespace Study.Core.Runtime.Server.Configuration
 {
     public class ServerAddress
     {

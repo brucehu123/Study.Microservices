@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Study.Core.Transport.Codec.Imp
+﻿namespace Study.Core.Transport.Codec.Imp
 {
     public class DefaultTransportMessageCodecFactory : ITransportMessageCodecFactory
     {

@@ -56,7 +56,7 @@
 
                 Stopwatch sw = Stopwatch.StartNew();
 
-                for (var i = 0; i < 1000; i++)
+                for (var i = 0; i < 10000; i++)
                 {
                     var result = userService.GetUserNameAsync(i).Result;
                 }

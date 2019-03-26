@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.Linq;
-using System.Text;
 using Microsoft.Extensions.Logging;
 
 namespace Study.Core.Runtime.Server.Imp
@@ -16,6 +13,7 @@ namespace Study.Core.Runtime.Server.Imp
         public DefaultServiceEntryLocator(IServiceEntryProvider provider, ILogger<DefaultServiceEntryLocator> logger)
         {
             _logger = logger;
+            //todo:添加服务注册
             Initialize(provider);
         }
 

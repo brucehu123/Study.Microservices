@@ -1,21 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using DotNetty.Common.Utilities;
 using DotNetty.Transport.Channels;
 using Microsoft.Extensions.Logging;
-using Study.Core.Exceptions;
-using Study.Core.Message;
-using Study.Core.Runtime.Client;
 using Study.Core.Transport;
 
 namespace Study.Transport.DotNetty
 {
     public class ChannelClientHandlerAdpter : ChannelHandlerAdapter
     {
-        //private readonly Func<EndPoint, IRpcClient> _getClient;
         private readonly Action<EndPoint> _removeClient;
         private readonly AttributeKey<EndPoint> _origEndPointKey;
         private readonly AttributeKey<IClientService> _clientServiceAttributeKey;

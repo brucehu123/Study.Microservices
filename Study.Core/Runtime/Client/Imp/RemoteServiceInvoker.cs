@@ -1,14 +1,5 @@
-﻿using DotNetty.Buffers;
-using DotNetty.Codecs;
-using DotNetty.Transport.Bootstrapping;
-using DotNetty.Transport.Channels;
-using DotNetty.Transport.Channels.Sockets;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Net;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Study.Core.Message;
@@ -40,6 +31,9 @@ namespace Study.Core.Runtime.Client.Imp
                 Parameters = context.Parameters
             };
             var transportMessage = TransportMessage.CreateInvokeMessage(message);
+
+            //todo: 地址改成服务发现
+            //todo: 添加断路器（polly）
             var client = _clientFactory.CreateClientAsync(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7788));
 
             try

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Study.Core.Message
+﻿namespace Study.Core.Message
 {
     /// <summary>
     /// 远程调用结果消息。
