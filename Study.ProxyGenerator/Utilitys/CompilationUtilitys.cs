@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Logging;
+using Study.Core;
 using Study.Core.Runtime.Client;
 using System.Collections.Generic;
 using System.IO;
@@ -34,7 +35,7 @@ namespace Study.ProxyGenerator.Utilitys
             references = new[]
             {
                 MetadataReference.CreateFromFile(typeof(Task).GetTypeInfo().Assembly.Location),
-                //MetadataReference.CreateFromFile(typeof(ServiceDescriptor).GetTypeInfo().Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(ServiceDescriptor).GetTypeInfo().Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(IRemoteServiceInvoker).GetTypeInfo().Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(IServiceProxyGenerater).GetTypeInfo().Assembly.Location)
             }.Concat(references);

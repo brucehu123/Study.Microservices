@@ -6,6 +6,7 @@ using Study.Core.Convertibles;
 using Study.Core.ServiceId;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Study.Core.Attributes;
 
 namespace Study.Core.Runtime.Server.Imp
 {
@@ -36,9 +37,21 @@ namespace Study.Core.Runtime.Server.Imp
         {
             var serviceId = _serviceIdGenerator.GenerateServiceId(method);
 
+            var serviceDescriptor = new ServiceDescriptor
+            {
+                Id = serviceId
+            };
+
+            var descriptorAttributes = method.GetCustomAttributes<RpcServiceDescriptorAttribute>();
+            foreach (var descriptorAttribute in descriptorAttributes)
+            {
+                descriptorAttribute.Apply(serviceDescriptor);
+            }
+
             var entry = new ServerEntry()
             {
                 ServiceId = serviceId,
+                Descriptor = serviceDescriptor,
                 Func = parameters =>
                 {
                     var serviceScopeFactory = _provider.GetRequiredService<IServiceScopeFactory>();
