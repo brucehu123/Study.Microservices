@@ -16,7 +16,7 @@ namespace Study.Core.ServiceDiscovery
         /// <returns>服务路由。</returns>
         public static async Task<ServiceRoute> GetAsync(this IServiceRouteManager serviceRouteManager, string serviceId)
         {
-            return (await serviceRouteManager.GetRoutes()).SingleOrDefault(i => i.ServiceDescriptor.Id == serviceId);
+            return (await serviceRouteManager.GetRoutesAsync()).SingleOrDefault(i => i.ServiceDescriptor.Id == serviceId);
         }
 
     }

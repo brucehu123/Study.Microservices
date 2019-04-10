@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Study.Common\Study.Common.csproj" />
+    <ProjectReference Include="..\Study.Core.Consul\Study.Core.Consul.csproj" />
     <ProjectReference Include="..\Study.Core\Study.Core.csproj" />
     <ProjectReference Include="..\Study.Transport.DotNetty\Study.Transport.DotNetty.csproj" />
   </ItemGroup>

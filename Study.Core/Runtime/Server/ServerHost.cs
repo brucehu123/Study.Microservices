@@ -46,6 +46,7 @@ namespace Study.Core.Runtime.Server
 
                     ServiceDescriptor = i.Descriptor
                 });
+                serviceRouteManager.Register(addressDescriptors);
                 return _server.StartAsync(cancellationToken);
             }
             catch (Exception ex)

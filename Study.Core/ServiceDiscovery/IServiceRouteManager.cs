@@ -32,11 +32,11 @@ namespace Study.Core.ServiceDiscovery
         /// 注销路由
         /// </summary>
         /// <returns></returns>
-        Task Deregister();
+        Task DeregisterAsync();
         /// <summary>
         /// 获取所有路由
         /// </summary>
         /// <returns></returns>
-        Task<IEnumerable<ServiceRoute>> GetRoutes();
+        Task<IEnumerable<ServiceRoute>> GetRoutesAsync();
     }
 }

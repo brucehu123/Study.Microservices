@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Study.Common;
 using Study.Core;
+using Study.Core.Consul;
 using Study.Transport.DotNetty;
 using System.IO;
 
@@ -18,6 +19,7 @@ namespace Study.Service
                 .AddRpcRuntime()
                 .AddRpcServer()
                 .UseDotNettyServer()
+                .UseConsulServer()
                 .ConfigureAppConfiguration((context, config) =>
                 {
                     config.SetBasePath(Directory.GetCurrentDirectory());

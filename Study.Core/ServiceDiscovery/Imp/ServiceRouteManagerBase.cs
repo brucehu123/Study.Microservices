@@ -45,13 +45,13 @@ namespace Study.Core.ServiceDiscovery.Imp
             remove { _changed -= value; }
         }
 
-        public abstract Task Deregister();
+        public abstract Task DeregisterAsync();
 
 
-        public abstract Task<IEnumerable<ServiceRoute>> GetRoutes();
+        public abstract Task<IEnumerable<ServiceRoute>> GetRoutesAsync();
 
 
-        Task IServiceRouteManager.Register(IEnumerable<ServiceRoute> routes)
+        public virtual Task Register(IEnumerable<ServiceRoute> routes)
         {
             if (routes == null)
                 throw new ArgumentNullException(nameof(routes));
@@ -70,6 +70,34 @@ namespace Study.Core.ServiceDiscovery.Imp
         }
 
         public abstract Task SetRoutesAsync(IEnumerable<ServiceRouteDescriptor> descriptors);
+
+
+        protected void OnCreated(params ServiceRouteEventArgs[] args)
+        {
+            if (_created == null)
+                return;
+
+            foreach (var arg in args)
+                _created(this, arg);
+        }
+
+        protected void OnChanged(params ServiceRouteChangedEventArgs[] args)
+        {
+            if (_changed == null)
+                return;
+
+            foreach (var arg in args)
+                _changed(this, arg);
+        }
+
+        protected void OnRemoved(params ServiceRouteEventArgs[] args)
+        {
+            if (_removed == null)
+                return;
+
+            foreach (var arg in args)
+                _removed(this, arg);
+        }
 
     }
 }
