@@ -13,7 +13,8 @@ using System.Reflection;
 using Study.Core.Runtime.Client;
 using Study.Core.Runtime.Client.Imp;
 using Study.Core.Runtime.Server.Imp;
-
+using Study.Core.ServiceDiscovery.Address.Resolvers;
+using Study.Core.ServiceDiscovery.Address.Resolvers.Imp;
 
 namespace Study.Core
 {
@@ -62,6 +63,7 @@ namespace Study.Core
             builder.ConfigureServices((context, services) =>
             {
                 services.AddHostedService<RpcClientHost>();
+                services.AddSingleton<IAddressResolver, DefaultAddressResolver>();
                 services.AddSingleton<IRemoteServiceInvoker, RemoteServiceInvoker>();
             });
             return builder;
