@@ -4,18 +4,21 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Study.Core.Message;
 using Study.Core.Transport;
+using Study.Core.ServiceDiscovery.Address.Resolvers;
 
 namespace Study.Core.Runtime.Client.Imp
 {
     public class RemoteServiceInvoker : IRemoteServiceInvoker
     {
         private readonly IRpcClientFactory _clientFactory;
+        private readonly IAddressResolver _addressResolver;
         private readonly ILogger<RemoteServiceInvoker> _logger;
 
-        public RemoteServiceInvoker(IRpcClientFactory factory, ILogger<RemoteServiceInvoker> logger)
+        public RemoteServiceInvoker(IRpcClientFactory factory, IAddressResolver addressResolver, ILogger<RemoteServiceInvoker> logger)
         {
             this._logger = logger;
             this._clientFactory = factory;
+            this._addressResolver = addressResolver;
         }
 
         public async Task<RemoteInvokeResultMessage> InvokeAsync(RemoteInvokeContext context)
@@ -34,14 +37,17 @@ namespace Study.Core.Runtime.Client.Imp
 
             //todo: 地址改成服务发现
             //todo: 添加断路器（polly）
-            var client = _clientFactory.CreateClientAsync(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7788));
+
+            var address = await _addressResolver.ResolverAsync(context.ServiceId);
+            var client = _clientFactory.CreateClientAsync(address.CreateEndPoint());
 
             try
             {
-              return  await client.SendAsync(transportMessage);
+                return await client.SendAsync(transportMessage);
             }
             catch (Exception e)
             {
+                //todo:service healthcheck markfaile
                 _logger.LogError("发送远程消息错误", e);
                 throw e;
             }

@@ -13,6 +13,6 @@ namespace Study.Core.ServiceDiscovery.Address.Selectors
         /// </summary>
         /// <param name="context">地址选择上下文。</param>
         /// <returns>地址模型。</returns>
-        Task<AddressModel> SelectAsync(ServiceRoute route);
+        ValueTask<AddressModel> SelectAsync(AddressSelectorContext context);
     }
 }

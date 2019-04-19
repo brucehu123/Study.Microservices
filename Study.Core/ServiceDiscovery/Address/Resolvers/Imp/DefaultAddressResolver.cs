@@ -57,10 +57,9 @@ namespace Study.Core.ServiceDiscovery.Address.Resolvers.Imp
             }
             else
             {
-                //重新赋值ServiceRoute,使Address集合始终有效
-                return await _selector.SelectAsync(new ServiceRoute()
+                return await _selector.SelectAsync(new AddressSelectorContext()
                 {
-                    ServiceDescriptor = serviceRoute.ServiceDescriptor,
+                    Descriptor = serviceRoute.ServiceDescriptor,
                     Address = address
                 });
             }

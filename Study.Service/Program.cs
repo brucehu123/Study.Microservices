@@ -19,7 +19,7 @@ namespace Study.Service
                 .AddRpcRuntime()
                 .AddRpcServer()
                 .UseDotNettyServer()
-                .UseConsulServer()
+                .UseConsul()
                 .ConfigureAppConfiguration((context, config) =>
                 {
                     config.SetBasePath(Directory.GetCurrentDirectory());

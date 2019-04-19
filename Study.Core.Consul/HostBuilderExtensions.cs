@@ -12,7 +12,7 @@ namespace Study.Core.Consul
 {
     public static class HostBuilderExtensions
     {
-        public static IHostBuilder UseConsulServer(this IHostBuilder builder)
+        public static IHostBuilder UseConsul(this IHostBuilder builder)
         {
             builder.ConfigureServices((context, services) =>
             {
