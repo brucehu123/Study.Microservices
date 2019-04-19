@@ -11,6 +11,7 @@
                 .AddRpcRuntime()
                 .AddRpcServer()
                 .UseDotNettyServer()
+				.UseConsul()
                 .ConfigureAppConfiguration((context, config) =>
                 {
                     config.SetBasePath(Directory.GetCurrentDirectory());

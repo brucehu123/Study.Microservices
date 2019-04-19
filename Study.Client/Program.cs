@@ -9,6 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Study.Core;
 using Study.Transport.DotNetty;
+using Study.Core.Consul;
+using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace Study.Client
 {
@@ -101,10 +104,17 @@ namespace Study.Client
                 .AddRpcClient()
                 .AddClientProxy()
                 .UseDotNettyClient()
+                .UseConsul()
                 .ConfigureLogging((context, logger) =>
                 {
                     logger.AddConfiguration(context.Configuration.GetSection("Logging"));
                     logger.AddConsole();
+                })
+                .ConfigureAppConfiguration((ctx, config) =>
+                {
+                    config.SetBasePath(Directory.GetCurrentDirectory());
+                    config.AddJsonFile("appsettings.json", optional: true);
+                    config.AddEnvironmentVariables();
                 });
 
             using (var host = builder.UseConsoleLifetime().Build())

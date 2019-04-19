@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Study.Core.Consul\Study.Core.Consul.csproj" />
     <ProjectReference Include="..\Study.ProxyGenerator\Study.ProxyGenerator.csproj" />
     <ProjectReference Include="..\Study.Transport.DotNetty\Study.Transport.DotNetty.csproj" />
   </ItemGroup>
