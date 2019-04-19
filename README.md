@@ -39,7 +39,7 @@
                 .AddRpcClient()
                 .AddClientProxy()
                 .UseDotNettyClient()
-				.UseConsulServer()
+				.UseConsul()
                 .ConfigureLogging((context, logger) =>
                 {
                     logger.AddConfiguration(context.Configuration.GetSection("Logging"));
