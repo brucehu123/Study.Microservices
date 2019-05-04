@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Study.Core.Message;
 using Study.Core.Transport;
 using Study.Core.ServiceDiscovery.Address.Resolvers;
+using Study.Core.ServiceDiscovery.HealthChecks;
 
 namespace Study.Core.Runtime.Client.Imp
 {
@@ -12,12 +13,14 @@ namespace Study.Core.Runtime.Client.Imp
     {
         private readonly IRpcClientFactory _clientFactory;
         private readonly IAddressResolver _addressResolver;
+        private readonly IHealthCheckService _healthCheckService;
         private readonly ILogger<RemoteServiceInvoker> _logger;
 
-        public RemoteServiceInvoker(IRpcClientFactory factory, IAddressResolver addressResolver, ILogger<RemoteServiceInvoker> logger)
+        public RemoteServiceInvoker(IRpcClientFactory factory, IAddressResolver addressResolver, IHealthCheckService healthCheckService, ILogger<RemoteServiceInvoker> logger)
         {
             this._logger = logger;
             this._clientFactory = factory;
+            this._healthCheckService = healthCheckService;
             this._addressResolver = addressResolver;
         }
 
@@ -35,7 +38,6 @@ namespace Study.Core.Runtime.Client.Imp
             };
             var transportMessage = TransportMessage.CreateInvokeMessage(message);
 
-            //todo: 地址改成服务发现
             //todo: 添加断路器（polly）
 
             var address = await _addressResolver.ResolverAsync(context.ServiceId);
@@ -47,7 +49,7 @@ namespace Study.Core.Runtime.Client.Imp
             }
             catch (Exception e)
             {
-                //todo:service healthcheck markfaile
+                await _healthCheckService.MarkFailure(address);
                 _logger.LogError("发送远程消息错误", e);
                 throw e;
             }
