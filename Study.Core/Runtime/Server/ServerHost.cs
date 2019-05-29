@@ -62,7 +62,9 @@ namespace Study.Core.Runtime.Server
         {
             if (_logger.IsEnabled(LogLevel.Information))
                 _logger?.LogInformation("服务开始断开...");
-            return _server.StopAsync(cancellationToken);
+            _server.StopAsync(cancellationToken);
+            var serviceRouteManager = _provider.GetService<IServiceRouteManager>();
+            return serviceRouteManager.DeregisterAsync();
         }
 
         public void Dispose()
