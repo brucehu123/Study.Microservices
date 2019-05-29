@@ -41,6 +41,7 @@ namespace Study.Core.Runtime.Client.Imp
             //todo: 添加断路器（polly）
 
             var address = await _addressResolver.ResolverAsync(context.ServiceId);
+            _logger.LogInformation(address.ToString());
             var client = _clientFactory.CreateClientAsync(address.CreateEndPoint());
 
             try

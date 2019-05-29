@@ -59,8 +59,11 @@ namespace Study.Core.Consul
             var host = new IpAddressModel(_address.Host, _address.Port) as AddressModel;
 
             var serviceRoutes = await GetRoutes(routes.Select(p => $"{ _config.RoutePath}{p.ServiceDescriptor.Id}"));
-            foreach (var route in routes)
+            var arrRoutes = routes.ToArray();
+            var cnt = routes.Count();
+            for (var i = 0; i < cnt; i++)
             {
+                var route = arrRoutes[i];
                 var serviceRoute = serviceRoutes.Where(p => p.ServiceDescriptor.Id == route.ServiceDescriptor.Id).FirstOrDefault();
 
                 if (serviceRoute != null)
@@ -75,24 +78,56 @@ namespace Study.Core.Consul
                     }
                     route.Address = addresses;
                 }
+                arrRoutes[i] = route;
             }
-            await RemoveExceptRoutesAsync(routes, host);
+            #region MyRegion
+            //foreach (var route in routes)
+            //{
+            //    var serviceRoute = serviceRoutes.Where(p => p.ServiceDescriptor.Id == route.ServiceDescriptor.Id).FirstOrDefault();
 
-            await base.Register(routes);
+            //    if (serviceRoute != null)
+            //    {
+            //        var addresses = serviceRoute.Address.Concat(
+            //          route.Address.Except(serviceRoute.Address)).ToList();
+
+            //        foreach (var address in route.Address)
+            //        {
+            //            addresses.Remove(addresses.Where(p => p.ToString() == address.ToString()).FirstOrDefault());
+            //            addresses.Add(address);
+            //        }
+            //        route.Address = addresses;
+            //    }
+            //} 
+            #endregion
+            await RemoveExceptRoutesAsync(arrRoutes, host);
+
+            await base.Register(arrRoutes);
         }
 
 
         public override async Task DeregisterAsync()
         {
-            var queryResult = await _consul.KV.List(_config.RoutePath);
-            var response = queryResult.Response;
-            if (response != null)
+            var host = new IpAddressModel(_address.Host, _address.Port) as AddressModel;
+
+
+
+            if (_consul.KV.Keys(_config.RoutePath).Result.Response?.Count() > 0)
             {
-                foreach (var result in response)
-                {
-                    await _consul.KV.DeleteCAS(result);
-                }
+                var keys = await _consul.KV.Keys(_config.RoutePath);
+                var routes = await GetRoutes(keys.Response);
+                await DeRegisterRoutesAsync(routes, host);
             }
+
+
+            //var queryResult = await _consul.KV.List(_config.RoutePath);
+            //var response = queryResult.Response;
+            //if (response != null)
+            //{
+            //    foreach (var result in response)
+            //    {
+            //        await _consul.KV.DeleteCAS(result);
+            //    }
+            //}
         }
 
         public void Dispose()
@@ -246,6 +281,41 @@ namespace Study.Core.Consul
                     if (addresses.Contains(hostAddr))
                         await _consul.KV.Delete($"{_config.RoutePath}{deletedRouteId}");
                 }
+            }
+        }
+        /// <summary>
+        /// 取消当前主机路由地址
+        /// </summary>
+        /// <param name="routes"></param>
+        /// <param name="hostAddr"></param>
+        /// <returns></returns>
+        private async Task DeRegisterRoutesAsync(IEnumerable<ServiceRoute> routes, AddressModel hostAddr)
+        {
+            var arrRoutes = routes.ToList();
+            if (_routes != null)
+            {
+                var cnt = routes.Count();
+                for (var i = 0; i < cnt; i++)
+                {
+                    var route = arrRoutes[i];
+                    var addresses = route.Address.ToList();
+                    if (addresses.Contains(hostAddr))
+                    {
+                        addresses.Remove(hostAddr);
+                        if (addresses.Count() == 0)
+                        {
+                            arrRoutes.Remove(route);
+                            await _consul.KV.Delete($"{_config.RoutePath}{route.ServiceDescriptor.Id}");
+                        }
+                        else
+                        {
+                            route.Address = addresses;
+                            arrRoutes[i] = route;
+                        }
+                    }
+                }
+                //重新注册路由
+                await base.Register(arrRoutes);
             }
         }
 
