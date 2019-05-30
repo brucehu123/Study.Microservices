@@ -68,7 +68,8 @@ namespace Study.Core
             {
                 services.AddHostedService<RpcClientHost>();
                 services.AddSingleton<IHealthCheckService, DefaultHealthCheckService>();
-                services.AddSingleton<IAddressSelector, RandomAddressSelector>();
+                //services.AddSingleton<IAddressSelector, RandomAddressSelector>();
+                services.AddSingleton<IAddressSelector, PollingAddressSelector>();
                 services.AddSingleton<IAddressResolver, DefaultAddressResolver>();
                 services.AddSingleton<IRemoteServiceInvoker, RemoteServiceInvoker>();
             });

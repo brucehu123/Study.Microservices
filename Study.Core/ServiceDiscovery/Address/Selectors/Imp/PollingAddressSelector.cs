@@ -19,7 +19,7 @@ namespace Study.Core.ServiceDiscovery.Address.Selectors.Imp
         public PollingAddressSelector(IServiceRouteManager serviceRouteManager, IHealthCheckService healthCheckService)
         {
             this._healthCheckService = healthCheckService;
-            serviceRouteManager.Changed += ServiceRouteManager_Removed;
+            serviceRouteManager.Changed += ServiceRouteManager_Changed;
             serviceRouteManager.Removed += ServiceRouteManager_Removed;
         }
 
@@ -44,6 +44,20 @@ namespace Study.Core.ServiceDiscovery.Address.Selectors.Imp
             var key = GetCacheKey(e.Route.ServiceDescriptor);
             Lazy<AddressEntry> value;
             _concurrent.TryRemove(key, out value);
+        }
+
+        private void ServiceRouteManager_Changed(object sender, ServiceRouteChangedEventArgs e)
+        {
+            var key = GetCacheKey(e.Route.ServiceDescriptor);
+
+            var addresses = e.Route.Address;
+           
+            if (!_concurrent.TryUpdate(key, new Lazy<AddressEntry>(() => new AddressEntry(addresses)), new Lazy<AddressEntry>(() => new AddressEntry(e.OldRoute.Address))))
+            {
+                if (_concurrent.TryRemove(key, out var value))
+                    _concurrent.TryAdd(key, new Lazy<AddressEntry>(() => new AddressEntry(addresses)));
+            }
+
         }
 
         private static string GetCacheKey(ServiceDescriptor descriptor)

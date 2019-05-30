@@ -68,7 +68,7 @@ namespace Study.Transport.DotNetty
             }
             catch (Exception e)
             {
-                throw new RpcException("与服务端通讯时发生了异常。", e);
+                throw new RpcConnectedException("与服务端通讯时发生了异常。", e);
             }
 
             return await callback;
