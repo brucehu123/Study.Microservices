@@ -6,6 +6,9 @@ using Study.Core.Message;
 using Study.Core.Transport;
 using Study.Core.ServiceDiscovery.Address.Resolvers;
 using Study.Core.ServiceDiscovery.HealthChecks;
+using Polly;
+using Study.Core.Exceptions;
+using Study.Core.Address;
 
 namespace Study.Core.Runtime.Client.Imp
 {
@@ -38,22 +41,54 @@ namespace Study.Core.Runtime.Client.Imp
             };
             var transportMessage = TransportMessage.CreateInvokeMessage(message);
 
-            //todo: 添加断路器（polly）
 
-            var address = await _addressResolver.ResolverAsync(context.ServiceId);
-            _logger.LogInformation(address.ToString());
-            var client = _clientFactory.CreateClientAsync(address.CreateEndPoint());
+            var retryPolicy = Policy.Handle<RpcConnectedException>()
+                .Or<RpcRemoteException>()
+                .WaitAndRetryAsync(5, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt))
+                               , async (ex, time, i, ctx) =>
+                                {
+                                    var address = ctx["address"] as AddressModel;
+                                    if (_logger.IsEnabled(LogLevel.Debug))
+                                        _logger.LogDebug($"第{i}次重试，重试时间间隔{time.Seconds},发生时间:{DateTime.Now},地址:{address.ToString()}");
+                                    _logger.LogInformation($"第{i}次重试，重试时间间隔{time.Seconds},发生时间:{DateTime.Now},地址:{address.ToString()}");
+                                    await _healthCheckService.MarkFailure(address);
+                                });
 
+
+            #region MyRegion
+            //var fallBackPolicy = Policy<TransportMessage>.Handle<Exception>().Fallback(new TransportMessage());
+            //var mixPolicy = Policy.Wrap(fallBackPolicy, retryPolicy); 
+            //var breakerPolicy=Policy.Handle<RpcConnectedException>()
+            //                    .CircuitBreakerAsync(5,TimeSpan.FromSeconds(10),)
+            #endregion
+
+            // var address = await _addressResolver.ResolverAsync(context.ServiceId);
             try
             {
-                return await client.SendAsync(transportMessage);
+                //var client = _clientFactory.CreateClientAsync(address.CreateEndPoint());
+                //return await client.SendAsync(transportMessage);
+                var policyContext = new Context();
+                return await retryPolicy.ExecuteAsync<RemoteInvokeResultMessage>(ctx =>
+                 {
+                     return RetryExectueAsync(ctx, _addressResolver, context.ServiceId, transportMessage);
+                 }, policyContext);
+
             }
             catch (Exception e)
             {
-                await _healthCheckService.MarkFailure(address);
+                //await _healthCheckService.MarkFailure(address);
                 _logger.LogError("发送远程消息错误", e);
                 throw e;
             }
+        }
+
+        private async Task<RemoteInvokeResultMessage> RetryExectueAsync(Context ctx, IAddressResolver resolver, string serviceId, TransportMessage transportMessage)
+        {
+            var address = await resolver.ResolverAsync(serviceId);
+            _logger.LogInformation($"地址：{address.ToString()}");
+            ctx["address"] = address;
+            var client = _clientFactory.CreateClientAsync(address.CreateEndPoint());
+            return await client.SendAsync(transportMessage);
         }
     }
 

@@ -10,12 +10,16 @@ using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using Microsoft.Extensions.Logging;
 using Study.Core.Transport.Codec;
+using Study.Core.ServiceDiscovery.HealthChecks;
+using Study.Core.Address;
+using Study.Core.Exceptions;
 
 namespace Study.Transport.DotNetty
 {
     public class DotNettyClientFactory : IRpcClientFactory, IDisposable
     {
         private readonly ITransportMessageDecoder _decoder;
+        private readonly IHealthCheckService _healthCheckService;
         private readonly ILogger<DotNettyClientFactory> _logger;
         private readonly ConcurrentDictionary<EndPoint, Lazy<IRpcClient>> _clients = new ConcurrentDictionary<EndPoint, Lazy<IRpcClient>>();
         private readonly Bootstrap _bootstrap;
@@ -24,9 +28,10 @@ namespace Study.Transport.DotNetty
         private static readonly AttributeKey<IClientService> _clientServiceAttributeKey =
             AttributeKey<IClientService>.ValueOf(typeof(DotNettyClientFactory), nameof(IClientService));
 
-        public DotNettyClientFactory(ITransportMessageCodecFactory factory, ILogger<DotNettyClientFactory> logger)
+        public DotNettyClientFactory(ITransportMessageCodecFactory factory, IHealthCheckService healthCheckService, ILogger<DotNettyClientFactory> logger)
         {
             _decoder = factory.CreateDecoder();
+            _healthCheckService = healthCheckService;
             _logger = logger;
             _bootstrap = GetBootstrap();
             _bootstrap.Handler(new ActionChannelInitializer<ISocketChannel>(c =>
@@ -61,14 +66,17 @@ namespace Study.Transport.DotNetty
                         var channel = bootstrap.ConnectAsync(ep).Result;
                         channel.GetAttribute(origEndPointKey).Set(ep);
                         channel.GetAttribute(_clientServiceAttributeKey).Set(clientService);
-                        return new DotNettyClient(channel,clientService);
+                        return new DotNettyClient(channel, clientService);
                     });
                 }).Value;
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                _clients.TryRemove(endPoint, out var value);
+                var ipEndPoint = endPoint as IPEndPoint;
+                if (ipEndPoint != null)
+                    _healthCheckService.MarkFailure(new IpAddressModel(ipEndPoint.Address.ToString(), ipEndPoint.Port));
+                throw new RpcConnectedException("与服务端连接时发生异常。", e);
             }
         }
 
