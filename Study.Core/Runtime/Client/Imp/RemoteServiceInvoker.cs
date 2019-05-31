@@ -50,7 +50,6 @@ namespace Study.Core.Runtime.Client.Imp
                                     var address = ctx["address"] as AddressModel;
                                     if (_logger.IsEnabled(LogLevel.Debug))
                                         _logger.LogDebug($"第{i}次重试，重试时间间隔{time.Seconds},发生时间:{DateTime.Now},地址:{address.ToString()}");
-                                    _logger.LogInformation($"第{i}次重试，重试时间间隔{time.Seconds},发生时间:{DateTime.Now},地址:{address.ToString()}");
                                     await _healthCheckService.MarkFailure(address);
                                 });
 
@@ -62,11 +61,8 @@ namespace Study.Core.Runtime.Client.Imp
             //                    .CircuitBreakerAsync(5,TimeSpan.FromSeconds(10),)
             #endregion
 
-            // var address = await _addressResolver.ResolverAsync(context.ServiceId);
             try
             {
-                //var client = _clientFactory.CreateClientAsync(address.CreateEndPoint());
-                //return await client.SendAsync(transportMessage);
                 var policyContext = new Context();
                 return await retryPolicy.ExecuteAsync<RemoteInvokeResultMessage>(ctx =>
                  {
@@ -85,7 +81,6 @@ namespace Study.Core.Runtime.Client.Imp
         private async Task<RemoteInvokeResultMessage> RetryExectueAsync(Context ctx, IAddressResolver resolver, string serviceId, TransportMessage transportMessage)
         {
             var address = await resolver.ResolverAsync(serviceId);
-            _logger.LogInformation($"地址：{address.ToString()}");
             ctx["address"] = address;
             var client = _clientFactory.CreateClientAsync(address.CreateEndPoint());
             return await client.SendAsync(transportMessage);

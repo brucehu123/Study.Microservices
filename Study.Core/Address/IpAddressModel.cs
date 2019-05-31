@@ -58,7 +58,7 @@ namespace Study.Core.Address
         /// <returns>A string that represents the current object.</returns>
         public override string ToString()
         {
-            return $"{Ip}:{Port}";
+            return string.Concat(new string[] { Ip, ":", Port.ToString() });
         }
 
         #endregion Overrides of AddressModel

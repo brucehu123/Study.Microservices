@@ -97,7 +97,7 @@ namespace Study.Core.Consul
             //        }
             //        route.Address = addresses;
             //    }
-            //} 
+            //}
             #endregion
             await RemoveExceptRoutesAsync(arrRoutes, host);
 
