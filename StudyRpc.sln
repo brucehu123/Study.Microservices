@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27004.2005
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29230.47
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Study.Common", "Study.Common\Study.Common.csproj", "{C37A5290-6700-4187-B9A5-821FCC1F4F0A}"
 EndProject
@@ -24,7 +24,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "doc", "doc", "{D66A4A7C-848
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Study.Core.Consul", "Study.Core.Consul\Study.Core.Consul.csproj", "{B59F05AD-079B-4604-AA50-F0BB5BC88249}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Study.Service1", "Study.Service1\Study.Service1.csproj", "{FCB9ED20-18AC-4B7D-80D1-AA91F7C76622}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Study.Service1", "Study.Service1\Study.Service1.csproj", "{FCB9ED20-18AC-4B7D-80D1-AA91F7C76622}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
