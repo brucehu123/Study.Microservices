@@ -41,11 +41,11 @@ namespace Study.Transport.DotNetty
             throw new NotImplementedException();
         }
 
-        public Task OnReceive(IChannelHandlerContext context, object message)
+        public async Task OnReceive(IChannelHandlerContext context, object message)
         {
             var data = (TransportMessage)message;
 
-            var result = _invoker.InvokerAsync(data).Result;
+            var result = await _invoker.InvokerAsync(data);
             if (result == null)
             {
                 throw new RpcRemoteException("本地服务调用失败", null);
@@ -55,9 +55,7 @@ namespace Study.Transport.DotNetty
             var byteMessage = _encoder.Encode(transportMessage);
             var buffer = Unpooled.Buffer(byteMessage.Length, byteMessage.Length);
             buffer.WriteBytes(byteMessage);
-            return context.WriteAndFlushAsync(buffer);
-
-
+            await context.WriteAndFlushAsync(buffer);
         }
     }
 }

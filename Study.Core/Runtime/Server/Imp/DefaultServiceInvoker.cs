@@ -51,7 +51,7 @@ namespace Study.Core.Runtime.Server.Imp
                 }
                 else
                 {
-                    task.Wait();
+                    await task;
 
                     var taskType = task.GetType().GetTypeInfo();
                     if (taskType.IsGenericType)

@@ -7,13 +7,13 @@ using Study.Core;
 using Study.Core.Consul;
 using Study.Transport.DotNetty;
 using System.IO;
-
+using System.Threading.Tasks;
 
 namespace Study.Service1
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             var host = new HostBuilder()
                 .AddRpcRuntime()
@@ -36,7 +36,7 @@ namespace Study.Service1
                      logger.AddConsole();
                  });
 
-            host.RunConsoleAsync().Wait();
+            await host.RunConsoleAsync();
         }
     }
 }

@@ -4,6 +4,6 @@ namespace Study.Core.Runtime.Client
 {
     public interface IRpcClientFactory
     {
-        IRpcClient CreateClientAsync(EndPoint endPoint);
+        IRpcClient CreateClient(EndPoint endPoint);
     }
 }

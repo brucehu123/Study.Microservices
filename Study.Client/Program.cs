@@ -12,6 +12,7 @@ using Study.Transport.DotNetty;
 using Study.Core.Consul;
 using Microsoft.Extensions.Configuration;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Study.Client
 {
@@ -97,7 +98,7 @@ namespace Study.Client
         //}
         #endregion
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             var builder = new HostBuilder()
                 .AddRpcRuntime()
@@ -119,7 +120,7 @@ namespace Study.Client
 
             using (var host = builder.UseConsoleLifetime().Build())
             {
-                host.Start();
+                await host.StartAsync();
 
                 var provider = host.Services;
                 var proxyGenerater = provider.GetService<IServiceProxyGenerater>();
@@ -132,18 +133,15 @@ namespace Study.Client
 
                 for (var i = 0; i < 10000; i++)
                 {
-                    var result = userService.GetUserNameAsync(i).Result;
+                    var result = await userService.GetUserNameAsync(i);
                     //Console.WriteLine(result);
                 }
                 sw.Stop();
                 Console.WriteLine($"调用结束,耗时：{sw.ElapsedMilliseconds} 毫秒");
 
-                host.WaitForShutdown();
+                await host.WaitForShutdownAsync();
             }
 
         }
-
-
-
     }
 }

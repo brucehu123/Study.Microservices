@@ -44,7 +44,7 @@ namespace Study.Transport.DotNetty
             }));
         }
 
-        public IRpcClient CreateClientAsync(EndPoint endPoint)
+        public IRpcClient CreateClient(EndPoint endPoint)
         {
             var key = endPoint;
             if (_logger.IsEnabled(LogLevel.Debug))

@@ -24,30 +24,30 @@ namespace Study.Transport.DotNetty
             _clientService = clientService;
             _clientService.OnReceived += message =>
             {
-                return Task.Run(() =>
+
+                TaskCompletionSource<TransportMessage> task;
+                if (!_resultDictionary.TryGetValue(message.Id, out task))
+                    return Task.CompletedTask;
+                if (message.IsInvokeResultMessage())
                 {
-                    TaskCompletionSource<TransportMessage> task;
-                    if (!_resultDictionary.TryGetValue(message.Id, out task))
-                        return;
-                    if (message.IsInvokeResultMessage())
+                    var content = message.GetContent<RemoteInvokeResultMessage>();
+                    if (!string.IsNullOrEmpty(content.ExceptionMessage))
                     {
-                        var content = message.GetContent<RemoteInvokeResultMessage>();
-                        if (!string.IsNullOrEmpty(content.ExceptionMessage))
-                        {
-                            task.TrySetException(new RpcRemoteException(content.ExceptionMessage));
-                        }
-                        else
-                        {
-                            task.SetResult(message);
-                        }
+                        task.TrySetException(new RpcRemoteException(content.ExceptionMessage));
                     }
-                });
+                    else
+                    {
+                        task.SetResult(message);
+                    }
+                }
+
+                return task.Task;
             };
         }
 
         public void Dispose()
         {
-            Task.Run(async () => { await _channel?.DisconnectAsync(); });
+            _channel.CloseAsync().Wait();
             foreach (var taskCompletionSource in _resultDictionary.Values)
             {
                 taskCompletionSource.TrySetCanceled();
@@ -86,9 +86,7 @@ namespace Study.Transport.DotNetty
             }
             finally
             {
-                //删除回调任务
-                TaskCompletionSource<TransportMessage> value;
-                _resultDictionary.TryRemove(id, out value);
+                _resultDictionary.TryRemove(id, out var value);
             }
         }
     }

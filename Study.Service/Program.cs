@@ -7,12 +7,13 @@ using Study.Core;
 using Study.Core.Consul;
 using Study.Transport.DotNetty;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Study.Service
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
 
             var host = new HostBuilder()
@@ -36,7 +37,7 @@ namespace Study.Service
                      logger.AddConsole();
                  });
 
-            host.RunConsoleAsync().Wait();
+            await host.RunConsoleAsync();
 
         }
     }

@@ -72,9 +72,8 @@ namespace Study.Core.Runtime.Client.Imp
             }
             catch (Exception e)
             {
-                //await _healthCheckService.MarkFailure(address);
                 _logger.LogError("发送远程消息错误", e);
-                throw e;
+                throw;
             }
         }
 
@@ -82,7 +81,7 @@ namespace Study.Core.Runtime.Client.Imp
         {
             var address = await resolver.ResolverAsync(serviceId);
             ctx["address"] = address;
-            var client = _clientFactory.CreateClientAsync(address.CreateEndPoint());
+            var client = _clientFactory.CreateClient(address.CreateEndPoint());
             return await client.SendAsync(transportMessage);
         }
     }
